@@ -5,20 +5,25 @@ wp_dataname="wordpress"
 wp_datauser="wp"
 wp_datapassword="password"
 path_wp="/var/www"
-wp_https_conf="
-\$_SERVER['REQUEST_URI'] = str_replace(\"/wp-admin/\", \"/wordpress/wp-admin/\",  \$_SERVER['REQUEST_URI']);
 
-if ( \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
+
+###########
+wp_https_conf==$(cat << EOF
+$_SERVER['REQUEST_URI'] = str_replace("/wp-admin/", "/wordpress/wp-admin/",  $_SERVER['REQUEST_URI']);
+
+if ( $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
 {
-        \$_SERVER['HTTPS']       = 'on';
-    \$_SERVER['SERVER_PORT'] = '443';
+        $_SERVER['HTTPS']       = 'on';
+    $_SERVER['SERVER_PORT'] = '443';
         define('FORCE_SSL_ADMIN', true);
 }
- 
-if ( isset(\$_SERVER['HTTP_X_FORWARDED_HOST']) )
+
+if ( isset($_SERVER['HTTP_X_FORWARDED_HOST']) )
 {
-        \$_SERVER['HTTP_HOST'] = \$_SERVER['HTTP_X_FORWARDED_HOST'];
-}"
+        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+}
+EOF
+)
 
 sudo apt install apache2 \
                  ghostscript \
@@ -135,6 +140,17 @@ path_file="$3"
 sudo sed -i "s/$text/$change_text/g" "$path_file"
 }
 
+function create_line_wp {
+add_text="$1"
+path_file="$2"
+if grep -qF "HTTP_X_FORWARDED_PROTO" "$path_file"; then
+echo "https wordpres ready"
+else
+echo "$add_text" > temp.txt
+sed -i '1r temp.txt' $path_file
+sudo rm temp.txt  
+fi
+}
 
  install_mysql
  install_wordpress
