@@ -1,26 +1,58 @@
 #!/bin/bash
-
 wp_root_password="password"
 wp_dataname="wordpress"
 wp_datauser="wp"
 wp_datapassword="password"
 path_wp="/var/www"
-
+apache_path="/etc/apache2"
+apache_port="8080"
+nginx_path="/etc/nginx"
 
 ###########
-wp_https_conf==$(cat << EOF
-$_SERVER['REQUEST_URI'] = str_replace("/wp-admin/", "/wordpress/wp-admin/",  $_SERVER['REQUEST_URI']);
+nginx_conf=$(cat << EOF
+server {
+        listen 443 ssl;
 
-if ( $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
+        ssl_certificate /etc/nginx/ssl/nginx.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx.key;
+
+        server_name www.up4soft.test up4soft.test;
+#       root /var/www;
+
+        location /wordpress/ {
+
+                proxy_pass http://localhost:8080/;
+                include /etc/nginx/proxy_params;
+}
+        location /site {
+                alias /var/www/site;
+                index index.html;
+}
+
+}
+
+
+server {
+        listen 80;
+        server_name www.task1-up4soft.test task1-up4soft.test;
+        return 301 https://\$host\$request_uri;
+}
+EOF
+)
+##########
+wp_https_conf=$(cat << EOF
+\$_SERVER['REQUEST_URI'] = str_replace("/wp-admin/", "/wordpress/wp-admin/",  \$_SERVER['REQUEST_URI']);
+
+if ( \$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https' )
 {
-        $_SERVER['HTTPS']       = 'on';
-    $_SERVER['SERVER_PORT'] = '443';
+        \$_SERVER['HTTPS']       = 'on';
+    \$_SERVER['SERVER_PORT'] = '443';
         define('FORCE_SSL_ADMIN', true);
 }
 
-if ( isset($_SERVER['HTTP_X_FORWARDED_HOST']) )
+if ( isset(\$_SERVER['HTTP_X_FORWARDED_HOST']) )
 {
-        $_SERVER['HTTP_HOST'] = $_SERVER['HTTP_X_FORWARDED_HOST'];
+        \$_SERVER['HTTP_HOST'] = \$_SERVER['HTTP_X_FORWARDED_HOST'];
 }
 EOF
 )
@@ -39,7 +71,8 @@ sudo apt install apache2 \
                  php-mysql \
                  php-xml \
                  php-zip \
-                 expect -y
+                 expect \
+                 nginx -y
 
 function install_mysql {
 sudo systemctl start mysql.service
@@ -158,3 +191,8 @@ change "database_name_here" "$wp_dataname" "$path_wp/wordpress/wp-config.php"
 change "username_here" "$wp_datauser" "$path_wp/wordpress/wp-config.php"
 change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
 create_line_wp "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
+
+change "80" "$apache_port" "$apache_path/ports.conf"
+change "80" "$apache_port" "$apache_path/sites-available/000-default.conf"
+change "/var/www/html" "$path_wp/wordpress" "$apache_path/sites-available/000-default.conf"
+create_line_wp "$nginx_conf" "$nginx_path/sites-available/default"
