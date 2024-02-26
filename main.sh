@@ -39,7 +39,7 @@ sudo apt install apache2 \
                  php-mysql \
                  php-xml \
                  php-zip \
-                 expect
+                 expect -y
 
 function install_mysql {
 sudo systemctl start mysql.service
@@ -152,9 +152,9 @@ sudo rm temp.txt
 fi
 }
 
- install_mysql
- install_wordpress
- change "database_name_here" "$wp_dataname" "$path_wp/wordpress/wp-config.php"
- change "username_here" "$wp_datauser" "$path_wp/wordpress/wp-config.php"
- change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
- #create_line "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
+install_mysql
+install_wordpress
+change "database_name_here" "$wp_dataname" "$path_wp/wordpress/wp-config.php"
+change "username_here" "$wp_datauser" "$path_wp/wordpress/wp-config.php"
+change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
+create_line_wp "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
