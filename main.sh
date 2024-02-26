@@ -5,7 +5,6 @@ wp_datauser="wp"
 wp_datapassword="password"
 path_wp="/var/www"
 apache_path="/etc/apache2"
-apache_port="8080"
 nginx_path="/etc/nginx"
 
 ###########
@@ -170,7 +169,7 @@ function change {
 text="$1"
 change_text="$2"
 path_file="$3"
-sudo sed -i "s/$text/$change_text/g" "$path_file"
+sudo sed -i "s/$text/$change_text/" "$path_file"
 }
 
 function create_line_wp {
@@ -192,7 +191,7 @@ change "username_here" "$wp_datauser" "$path_wp/wordpress/wp-config.php"
 change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
 create_line_wp "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
 
-change "80" "$apache_port" "$apache_path/ports.conf"
-change "80" "$apache_port" "$apache_path/sites-available/000-default.conf"
-change "/var/www/html" "$path_wp/wordpress" "$apache_path/sites-available/000-default.conf"
+change "Listen 80" "Listen 8080" "$apache_path/ports.conf"
+change "\*:80>" "\*:8080" "/etc/apache2/sites-available/000-default.conf"
+change "\/var\/www\/html" "\/var\/www\/wordpress" "/etc/apache2/sites-available/000-default.conf"
 create_line_wp "$nginx_conf" "$nginx_path/sites-available/default"
