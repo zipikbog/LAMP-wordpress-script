@@ -198,7 +198,7 @@ change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
 create_line_wp "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
 
 change "Listen 80" "Listen 8080" "$apache_path/ports.conf"
-change "\*:80>" "\*:8080" "/etc/apache2/sites-available/000-default.conf"
+change "\*:80" "\*:8080" "/etc/apache2/sites-available/000-default.conf"
 change "\/var\/www\/html" "\/var\/www\/wordpress" "/etc/apache2/sites-available/000-default.conf"
 sudo systemctl restart apache2
 
