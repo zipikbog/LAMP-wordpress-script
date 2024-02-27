@@ -194,15 +194,17 @@ function ssh_pass_close {
 sudo sed -i 's/^#*PasswordAuthentication.*$/PasswordAuthentication no/g' /etc/ssh/sshd_config
 sudo systemctl restart sshd      
 }
-replace_in_file() {
-    local to_replace=$1
-    local replace_with=$2
-    local file_path=$3
 
-    if grep -q "$replace_with" "$file_path"; then
-    else
-        sed -i "s/$to_replace/$replace_with/" "$file_path"
-    fi
+function replace_in_file {
+to_replace=$1
+replace_with=$2
+file_path=$3
+
+if grep -q "$replace_with" "$file_path"; then
+:
+else
+sed -i "s/$to_replace/$replace_with/" "$file_path"
+fi
 }
 
 
