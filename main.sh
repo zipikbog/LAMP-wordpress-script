@@ -61,6 +61,7 @@ EOF
 
 
 ##########
+sudo apt update
  sudo apt install -y apache2 \
                  ghostscript \
                  libapache2-mod-php \
@@ -200,6 +201,7 @@ change "Listen 80" "Listen 8080" "$apache_path/ports.conf"
 change "\*:80>" "\*:8080" "/etc/apache2/sites-available/000-default.conf"
 change "\/var\/www\/html" "\/var\/www\/wordpress" "/etc/apache2/sites-available/000-default.conf"
 sudo systemctl restart apache2
+
 create_line_wp "$nginx_conf" "$nginx_path/sites-available/default"
 
 if [ "$nginx_conf" != "$nginx_content" ]; then
