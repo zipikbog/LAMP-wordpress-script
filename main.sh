@@ -6,7 +6,7 @@ wp_datapassword="password"
 path_wp="/var/www"
 apache_path="/etc/apache2"
 nginx_path="/etc/nginx"
-
+nginx_content=$(<"$nginx_path/sites-enabled/default")
 ###########
 nginx_conf=$(cat << EOF
 server {
@@ -56,22 +56,22 @@ if ( isset(\$_SERVER['HTTP_X_FORWARDED_HOST']) )
 EOF
 )
 
-sudo apt install apache2 \
-                 ghostscript \
-                 libapache2-mod-php \
-                 mysql-server \
-                 php \
-                 php-bcmath \
-                 php-curl \
-                 php-imagick \
-                 php-intl \
-                 php-json \
-                 php-mbstring \
-                 php-mysql \
-                 php-xml \
-                 php-zip \
-                 expect \
-                 nginx -y
+#  sudo apt install apache2 \
+#                  ghostscript \
+#                  libapache2-mod-php \
+#                  mysql-server \
+#                  php \
+#                  php-bcmath \
+#                  php-curl \
+#                  php-imagick \
+#                  php-intl \
+#                  php-json \
+#                  php-mbstring \
+#                  php-mysql \
+#                  php-xml \
+#                  php-zip \
+#                  expect \
+#                  nginx -y
 
 function install_mysql {
 sudo systemctl start mysql.service
@@ -184,14 +184,28 @@ sudo rm temp.txt
 fi
 }
 
-install_mysql
-install_wordpress
-change "database_name_here" "$wp_dataname" "$path_wp/wordpress/wp-config.php"
-change "username_here" "$wp_datauser" "$path_wp/wordpress/wp-config.php"
-change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
-create_line_wp "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
+# install_mysql
+# install_wordpress
+# change "database_name_here" "$wp_dataname" "$path_wp/wordpress/wp-config.php"
+# change "username_here" "$wp_datauser" "$path_wp/wordpress/wp-config.php"
+# change "password_here" "$wp_datapassword" "$path_wp/wordpress/wp-config.php"
+# create_line_wp "$wp_https_conf" "$path_wp/wordpress/wp-config.php"
 
-change "Listen 80" "Listen 8080" "$apache_path/ports.conf"
-change "\*:80>" "\*:8080" "/etc/apache2/sites-available/000-default.conf"
-change "\/var\/www\/html" "\/var\/www\/wordpress" "/etc/apache2/sites-available/000-default.conf"
-create_line_wp "$nginx_conf" "$nginx_path/sites-available/default"
+# change "Listen 80" "Listen 8080" "$apache_path/ports.conf"
+# change "\*:80>" "\*:8080" "/etc/apache2/sites-available/000-default.conf"
+# change "\/var\/www\/html" "\/var\/www\/wordpress" "/etc/apache2/sites-available/000-default.conf"
+# sudo systemctl restart apache2
+# create_line_wp "$nginx_conf" "$nginx_path/sites-available/default"
+
+if [ "$nginx_conf" != "$nginx_content" ]; then
+sudo echo "$nginx_conf" > /etc/nginx/sites-available/default
+else
+echo "Содержимое переменной совпадает с содержимым файла"
+fi
+
+if ! [ -d "$nginx_path/ssl" ]; then
+sudo mkdir "$nginx_path/ssl"
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
+else
+echo "сертфы готовы"
+fi
