@@ -33,7 +33,7 @@ server {
 
 server {
         listen 80;
-        server_name www.task1-up4soft.test task1-up4soft.test;
+        server_name www.up4soft.test up4soft.test;
         return 301 https://\$host\$request_uri;
 }
 EOF
@@ -53,10 +53,15 @@ if ( isset(\$_SERVER['HTTP_X_FORWARDED_HOST']) )
 {
         \$_SERVER['HTTP_HOST'] = \$_SERVER['HTTP_X_FORWARDED_HOST'];
 }
+define( 'WP_HOME', 'https://up4soft.test/wordpress' );
+define( 'WP_SITEURL', 'https://up4soft.test/wordpress' );
 EOF
 )
+##########
 
- sudo apt install apache2 \
+
+##########
+ sudo apt install -y apache2 \
                  ghostscript \
                  libapache2-mod-php \
                  mysql-server \
@@ -71,7 +76,7 @@ EOF
                  php-xml \
                  php-zip \
                  expect \
-                 nginx -y
+                 nginx 
 
 function install_mysql {
 sudo systemctl start mysql.service
@@ -209,3 +214,4 @@ openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout /etc/nginx/ssl/ngin
 else
 echo "сертфы готовы"
 fi
+sudo systemctl restart nginx
