@@ -190,6 +190,12 @@ sudo rm temp.txt
 fi
 }
 
+function ssh_pass_close {
+sudo sed -i 's/^#*PasswordAuthentication.*$/PasswordAuthentication no/g' /etc/ssh/sshd_config
+sudo systemctl restart sshd      
+}
+
+
 install_mysql
 install_wordpress
 change "database_name_here" "$wp_dataname" "$path_wp/wordpress/wp-config.php"
@@ -217,3 +223,12 @@ else
 echo "сертфы готовы"
 fi
 sudo systemctl restart nginx
+
+ssh_pass_close
+sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw enable
+sudo ufw status
