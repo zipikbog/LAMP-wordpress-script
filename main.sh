@@ -1,5 +1,5 @@
 #!/bin/bash
-wp_root_password="password"
+wp_root_password="password1576"
 wp_dataname="wordpress"
 wp_datauser="wp"
 wp_datapassword="password"
